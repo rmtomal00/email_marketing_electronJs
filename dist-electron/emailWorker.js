@@ -1,118 +1,105 @@
-import { parentPort } from "worker_threads";
-async function sendEmail(data) {
+import { parentPort as o } from "worker_threads";
+async function i(s) {
   try {
-    const emailSendStatus = await fetch("https://api.team71.link/api/v1/public/send-email", {
+    const e = await fetch("https://api.team71.link/api/v1/public/send-email", {
       headers: {
         "Content-Type": "application/json",
-        "api-key": data.ApiKey
+        "api-key": s.ApiKey
       },
       method: "POST",
       body: JSON.stringify({
-        "to": data.To,
-        "from": data.From,
-        "subject": data.Subject,
-        "isHtml": data.IsHtml,
-        "content": data.Content,
-        "useTracker": data.UseTracker,
-        "brandName": data.BrandName,
-        "replyTo": data.ReplyTo
+        to: s.To,
+        from: s.From,
+        subject: s.Subject,
+        isHtml: s.IsHtml,
+        content: s.Content,
+        useTracker: s.UseTracker,
+        brandName: s.BrandName,
+        replyTo: s.ReplyTo
       })
-    }).then((res) => res.json());
+    }).then((n) => n.json());
     return {
-      email: data.To,
-      message: emailSendStatus.message,
-      status: emailSendStatus.error ? "Not Send" : "Send"
+      email: s.To,
+      message: e.message,
+      status: e.error ? "Not Send" : "Send"
     };
-  } catch (error) {
+  } catch (e) {
     return {
-      email: data.To,
-      message: error.message,
+      email: s.To,
+      message: e.message,
       status: "Not Send"
     };
   }
 }
-async function sendEmailAttachment(data) {
+async function m(s) {
   try {
-    const formData = new FormData();
-    formData.append("to", data.To);
-    formData.append("from", data.From);
-    formData.append("subject", data.Subject);
-    formData.append("content", data.Content);
-    formData.append("isHtml", String(data.IsHtml));
-    formData.append("useTracker", String(data.UseTracker));
-    formData.append("brandName", data.BrandName);
-    formData.append(
+    const e = new FormData();
+    e.append("to", s.To), e.append("from", s.From), e.append("subject", s.Subject), e.append("content", s.Content), e.append("isHtml", String(s.IsHtml)), e.append("useTracker", String(s.UseTracker)), e.append("brandName", s.BrandName), e.append(
       "files",
       new File(
-        [new Uint8Array(data.Files.dataBuffer)],
+        [new Uint8Array(s.Files.dataBuffer)],
         // 1. Put buffer inside an array []
-        data.Files.name,
+        s.Files.name,
         // 2. The original filename
-        { type: data.Files.type }
+        { type: s.Files.type }
         // 3. The original MIME type
       )
-    );
-    formData.append("replyTo", data.ReplyTo);
-    const emailSendStatus = await fetch("https://api.team71.link/api/v1/public/send-email-attachment", {
+    ), e.append("replyTo", s.ReplyTo);
+    const n = await fetch("https://api.team71.link/api/v1/public/send-email-attachment", {
       headers: {
-        "api-key": data.ApiKey
+        "api-key": s.ApiKey
         // Note: Do NOT set "Content-Type" manually — the browser sets it automatically
         // with the correct multipart/form-data boundary when using FormData
       },
       method: "POST",
-      body: formData
-    }).then((res) => res.json());
+      body: e
+    }).then((r) => r.json());
     return {
-      email: data.To,
-      message: emailSendStatus.message,
-      status: emailSendStatus.error ? "Not Send" : "Send"
+      email: s.To,
+      message: n.message,
+      status: n.error ? "Not Send" : "Send"
     };
-  } catch (error) {
+  } catch (e) {
     return {
-      email: data.To,
-      message: error.message,
+      email: s.To,
+      message: e.message,
       status: "Not Send"
     };
   }
 }
-if (parentPort) {
-  const port = parentPort;
-  port.on("message", async (data) => {
-    const emailLists = data.emailList;
-    while (data.action && emailLists.length > 0) {
-      if (!data.file) {
-        const emailData = {
-          ApiKey: data.apiKey,
-          To: emailLists[0],
-          From: data.from,
-          Content: data.emailBody,
-          Subject: data.emailSubject,
-          IsHtml: true,
-          UseTracker: data.isTracker,
-          BrandName: data.brandName,
-          ReplyTo: data.replyTo
-        };
-        const response = await sendEmail(emailData);
-        emailLists.shift();
-        port.postMessage(response);
+if (o) {
+  const s = o;
+  s.on("message", async (e) => {
+    const n = e.emailList;
+    for (; e.action && n.length > 0; )
+      if (e.file) {
+        const r = {
+          ApiKey: e.apiKey,
+          To: n[0],
+          From: e.from,
+          Content: e.emailBody,
+          Subject: e.emailSubject,
+          IsHtml: !0,
+          UseTracker: e.isTracker,
+          BrandName: e.brandName,
+          Files: e.file,
+          ReplyTo: e.replyTo
+        }, t = await m(r);
+        n.shift(), s.postMessage(t);
       } else {
-        const emailDataAtt = {
-          ApiKey: data.apiKey,
-          To: emailLists[0],
-          From: data.from,
-          Content: data.emailBody,
-          Subject: data.emailSubject,
-          IsHtml: true,
-          UseTracker: data.isTracker,
-          BrandName: data.brandName,
-          Files: data.file,
-          ReplyTo: data.replyTo
-        };
-        const res = await sendEmailAttachment(emailDataAtt);
-        emailLists.shift();
-        port.postMessage(res);
+        const r = {
+          ApiKey: e.apiKey,
+          To: n[0],
+          From: e.from,
+          Content: e.emailBody,
+          Subject: e.emailSubject,
+          IsHtml: !0,
+          UseTracker: e.isTracker,
+          BrandName: e.brandName,
+          ReplyTo: e.replyTo
+        }, t = await i(r);
+        n.shift(), s.postMessage(t);
       }
-    }
     process.exit(0);
   });
 }

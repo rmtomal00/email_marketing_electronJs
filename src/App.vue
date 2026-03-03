@@ -31,7 +31,7 @@ const navItems = [
   { icon: PaperAirplaneIcon, label: 'Send', path: '/send' },
   { icon: Cog6ToothIcon, label: 'Settings', path: '/settings' }
 ]
-
+router.push({name:'Home'})
 const navigate = (path: string) => {
   router.push(path)
 }

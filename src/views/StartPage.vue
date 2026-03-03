@@ -101,6 +101,8 @@ const onWorkerMessage = (_event: any, message: any) => {
 }
 
 const onWorkerExit = (_event: any, data: any) => {
+  console.log(data);
+  
   progress.value = false
   showDialog(true, "Email Sending Status", "Email sending task is finished/paused successfull.")
 
