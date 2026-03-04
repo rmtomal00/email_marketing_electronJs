@@ -1,1 +1,37 @@
-"use strict";const t=require("electron"),o=new Map;t.contextBridge.exposeInMainWorld("ipcRenderer",{on(...n){const[r,e]=n,c=(i,...s)=>e(i,...s);return o.set(e,c),t.ipcRenderer.on(r,c)},off(...n){const[r,e]=n,c=o.get(e);c?(t.ipcRenderer.off(r,c),o.delete(e)):t.ipcRenderer.off(r,e)},removeAllListeners(n){t.ipcRenderer.removeAllListeners(n)},once(n,r){t.ipcRenderer.once(n,(e,...c)=>r(e,...c))},send(...n){const[r,...e]=n;return t.ipcRenderer.send(r,...e)},invoke(...n){const[r,...e]=n;return t.ipcRenderer.invoke(r,...e)}});
+"use strict";
+const electron = require("electron");
+const listenerMap = /* @__PURE__ */ new Map();
+electron.contextBridge.exposeInMainWorld("ipcRenderer", {
+  on(...args) {
+    const [channel, listener] = args;
+    const wrapped = (event, ...args2) => listener(event, ...args2);
+    listenerMap.set(listener, wrapped);
+    return electron.ipcRenderer.on(channel, wrapped);
+  },
+  off(...args) {
+    const [channel, listener] = args;
+    const wrapped = listenerMap.get(listener);
+    if (wrapped) {
+      electron.ipcRenderer.off(channel, wrapped);
+      listenerMap.delete(listener);
+    } else {
+      electron.ipcRenderer.off(channel, listener);
+    }
+  },
+  // ✅ ADD THIS (IMPORTANT for cleanup)
+  removeAllListeners(channel) {
+    electron.ipcRenderer.removeAllListeners(channel);
+  },
+  // ✅ OPTIONAL (useful)
+  once(channel, listener) {
+    electron.ipcRenderer.once(channel, (event, ...args) => listener(event, ...args));
+  },
+  send(...args) {
+    const [channel, ...omit] = args;
+    return electron.ipcRenderer.send(channel, ...omit);
+  },
+  invoke(...args) {
+    const [channel, ...omit] = args;
+    return electron.ipcRenderer.invoke(channel, ...omit);
+  }
+});
