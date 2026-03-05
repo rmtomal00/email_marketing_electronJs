@@ -21,7 +21,7 @@
     ],
     "win": {
       "target": ["nsis"],
-      "icon": "public/electron-vite.svg"
+      "icon": "public/icon.ico"
     },
     "nsis": {
       "oneClick": false,
@@ -32,7 +32,7 @@
       "target": ["AppImage"],
       "category": "Network",
       "executableName": "senderx",
-      "icon": "public/electron-vite.svg"
+      "icon": "public/icon.ico"
     }
   },
   "dependencies": {
