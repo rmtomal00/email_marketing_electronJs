@@ -137,14 +137,10 @@ const getCleanHtml = () => {
   return tempDiv.innerHTML;
 }
 
-async function emailList(){
+async function emailList(): Promise<boolean>{
   if (!emailListFile.value) {
-    dTitle.value = "Input Error"
-    dMessage.value = "Please select a only TXT or DOCX file as email list."
-    progressBar.value = false
-    dVisiable.value = true;
     //alert("Only TXT or DOCX allowed");
-    return;
+    return false;
   }
   const allowedTypes = [
     "text/plain",
@@ -152,20 +148,16 @@ async function emailList(){
   ];
   const file = emailListFile.value as File;
   if (!allowedTypes.includes(file.type)) {
-    dTitle.value = "Input Error"
-    dMessage.value = "Please select a only TXT or DOCX file as email list."
-    progressBar.value = false
-    dVisiable.value = true;
-    //alert("Only TXT or DOCX allowed");
-    return;
+    return false;
   }
 
   if(file.type === "text/plain"){
     const emails = await readTxtFile(file);
     emailLists.value = emails;
-    return
+    return true
   }
   emailLists.value = await readDocxFile(file);
+  return true
 }
 
 function handleChangeFile(e: Event) {
@@ -190,7 +182,15 @@ const datal = async () => {
     return;
   }
   progressBar.value = true
-  await emailList();
+  const status = await emailList();
+
+  if(!status){
+    dTitle.value = "Input Error"
+    dMessage.value = "You don't select any correct file. Email list must be a TXT or DOCX file."
+    dVisiable.value = true;
+    progressBar.value = false
+    return;
+  }
 
   const getCradiantial = await useAppData.load(StoreNames.UserInfo) as Data
   if (!getCradiantial.api_key || !getCradiantial.companyName || !getCradiantial.replyTo || !getCradiantial.email){
