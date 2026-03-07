@@ -32,7 +32,7 @@
       "target": ["AppImage"],
       "category": "Network",
       "executableName": "senderx",
-      "icon": "public/icon.ico"
+      "icon": "public/icon.svg"
     }
   },
   "dependencies": {
