@@ -49,13 +49,13 @@
       </div>
     </div>
     <div class="mb-3 mt-3">
-      <button @click="datal" class="btn btn-secondary">Get Full Styled HTML</button>
+      <button @click="datal" class="btn btn-secondary">Send Email</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import Editor from 'primevue/editor'
 import Quill from 'quill'
 import { PencilSquareIcon } from '@heroicons/vue/24/outline';
@@ -68,7 +68,7 @@ import { useAppStore } from '../store/userInfo';
 import { usePassEmailData } from '../store/passData';
 import { StoreNames } from '../enums/storeTypes';
 import { Data } from '../interfaces/settings';
-import { PassEmailAllData } from '../interfaces/send';
+import { PassEmailAllData, StoreLastSend } from '../interfaces/send';
 import { FileData } from '../interfaces/apicalls';
 /** * TypeScript Fix: 
  * Quill.import returns 'unknown' by default. We cast to 'any' to 
@@ -101,6 +101,11 @@ const value = ref('');
 const subject = ref('')
 const isCheck = ref(false);
 const fileUpload = ref<File | null>(null)
+
+
+onMounted(async ()=>{
+  await loadSaveData()
+})
 
 const onEditorLoad = ({ instance }: { instance: any }) => {
   quill.value = instance
@@ -215,7 +220,33 @@ const datal = async () => {
   }
   progressBar.value = false
   passDataEmail.setData(passdata);
+  await saveData()
   router.push({name: 'SendStart'})
+}
+
+async function saveData(){
+  const lastdata:StoreLastSend = {
+    subject: subject.value,
+    template: value.value
+  }
+  await useAppData.save(StoreNames.LastTemplate, lastdata)
+}
+
+async function loadSaveData(){
+  const loadLastData = await useAppData.load(StoreNames.LastTemplate);
+  if (!loadLastData) {
+    return
+  }
+  const data = loadLastData as StoreLastSend;
+
+  if(data.template){
+    d.value = data.template
+  }
+
+  if(data.subject){
+    subject.value = data.subject
+  }
+
 }
 
 function loadData(e: any){

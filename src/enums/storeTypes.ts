@@ -1,4 +1,5 @@
 export enum StoreNames {
   UserInfo = "userinfo",
-  User = "user"
+  User = "user",
+  LastTemplate = "last_template"
 }

@@ -11,3 +11,8 @@ export interface PassEmailAllData{
     ReplyTo: string,
     FilesSend: FileData | null
 }
+
+export interface StoreLastSend{
+    template: string,
+    subject: string
+}
